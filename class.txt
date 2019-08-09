@@ -2,14 +2,15 @@ Front Bumper
 Front Head Lamp
 Grill
 Hood
-Front Door
-Back Door
-Wing
+Front Side Door
+Rear Side Door
+Front Fender
 Skirt
 Spion
-Back Bumper
-Back Door
-Back Lamp
+Rear Bumper
+Rear Door
+Rear Lamp
 Front Shield
-Back Shield
+Rear Shield
 Side Shield
+Rear Fender

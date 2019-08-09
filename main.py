@@ -25,7 +25,10 @@ class LabelTool():
 
         # initialize global state
         self.imageDir = ''
+        self.otherImageDir = ''
         self.imageList= []
+        self.listClassName = ["Front Bumper","Front Head Lamp","Grill","Hood","Front Side Door","Rear Side Door","Front Fender","Skirt","Spion",
+                                "Rear Bumper","Rear Door","Rear Lamp","Front Shield","Rear Shield","Side Shield","Rear Fender"]
         self.egDir = ''
         self.egList = []
         self.outDir = ''
@@ -33,6 +36,7 @@ class LabelTool():
         self.total = 0
         self.category =''
         self.imagename = ''
+        self.newimagepath =''
         self.labelfilename = ''
         self.classLabel = ''
         self.tkimg = None
@@ -46,6 +50,7 @@ class LabelTool():
         self.bboxIdList = []
         self.bboxId = None
         self.bboxList = []
+        self.bboxListGoogle = []
         self.hl = None
         self.vl = None
 
@@ -209,6 +214,10 @@ class LabelTool():
             s = r'D:\workspace\python\labelGUI'
         # get image list
         self.imageDir = os.path.join('./images', self.category)
+        self.otherImageDir = os.path.join('./images/selected', self.category)
+        if not os.path.exists(self.otherImageDir):
+            os.mkdir(self.otherImageDir)
+        self.otherImageDir = './images/selected/'
         self.imageList= os.listdir(self.imageDir)
         # self.imageList = glob.glob(os.path.join(self.imageDir, '*.JPEG'))
         print(self.imageList)
@@ -229,7 +238,9 @@ class LabelTool():
         if not os.path.exists(self.outDir):
             os.makedirs(self.outDir)
         self.outDir = './labels/original/'+ self.category
+        self.newDir = './labels/selected/'+ self.category
         self.listImage = './labels/original/train.txt'
+        self.listImageGoogle = './labels/original/train_google.txt'
         if not os.path.exists(self.outDir):
             os.makedirs(self.outDir)
         self.tmp = []
@@ -306,6 +317,8 @@ class LabelTool():
                                                             width = 2, \
                                                             outline = COLORS[(len(self.bboxList)-1) % len(COLORS)])
                     self.bboxIdList.append(tmpId)
+                    self.bboxListGoogle.append((self.listClassName[int(new_tmp[0])],float(conv_x1/self.img.size[0]), float(conv_y1/self.img.size[1]), float(conv_x2/self.img.size[0]), float(conv_y1/self.img.size[1]), 
+                                                float(conv_x2/self.img.size[0]), float(conv_y2/self.img.size[1]), float(conv_x1/self.img.size[0]), float(conv_y2/self.img.size[1])))
                     self.listbox.insert(END, '%d (%0.1f, %0.1f) -> (%0.1f, %0.1f)' %(new_tmp[0], conv_x1, conv_y1, conv_x2, conv_y2))
                     self.listbox.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[(len(self.bboxIdList) - 1) % len(COLORS)])
 
@@ -318,9 +331,17 @@ class LabelTool():
             os.makedirs('./labels/original/'+ self.category)
 
         if len(self.bboxList)>0:
+            shutil.copyfile(self.newimagepath, self.otherImageDir + self.imagename + '.jpg')
             with open(self.listImage, 'a') as f:
                 a = str(''.join(self.image)+'\n')
                 f.write(a)
+            with open(self.listImageGoogle, 'a') as f:
+                print(len(self.bboxListGoogle))
+                for bbox in self.bboxListGoogle:
+                    a = str("TRAIN,"+"gs://carmudi/images/"+''.join(self.image.split("\\")[2])+','+str(bbox[0])+','+str(bbox[1])+','+str(bbox[2])+','+str(bbox[3])+','+str(bbox[4])+','+str(bbox[5])+','+str(bbox[6])+','+str(bbox[7])+','+str(bbox[8])+'\n')
+                    #a = str(''.join(self.image)+'\n')
+                    f.write(a)
+
             with open(self.labelfilename, 'w') as f:
                 for bbox in self.bboxList:
                     a = str(' '.join(map(str, bbox)) + '\n')
@@ -356,6 +377,7 @@ class LabelTool():
                 conv_w = float(w / size[0])
                 conf_h = float(h / size[1])
                 self.bboxList.append((idx, conv_x, conv_y, conv_w, conf_h))
+                self.bboxListGoogle.append((sel[0], float(x1/w), float(y1/h), float(x2/w), float(y1/h), float(x2/w), float(y2/h), float(x1/w), float(y2/h)))
                 self.bboxIdList.append(self.bboxId)
                 self.bboxId = None
                 self.listbox.insert(END, '%d (%0.4f, %0.4f, %0.4f, %0.4f)' % (idx, conv_x, conv_y, conv_w, conf_h))
@@ -430,6 +452,7 @@ class LabelTool():
         self.listbox.delete(0, len(self.bboxList))
         self.bboxIdList = []
         self.bboxList = []
+        self.bboxListGoogle = []
 
     def prevImage(self, event = None):
         self.saveImage()
