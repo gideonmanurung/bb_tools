@@ -311,7 +311,8 @@ class LabelTool():
                     conv_x2 = int(conv_w + conv_x1)
                     conv_y2 = int(conv_h + conv_y1)
 
-                    self.bboxList.append(tuple(tmp))
+                    #self.bboxList.append(tuple(tmp))
+                    self.bboxList.append((int(tmp[0]),tmp[1],tmp[2],tmp[3],tmp[4]))
                     tmpId = self.mainPanel.create_rectangle(conv_x1, conv_y1, \
                                                             conv_x2, conv_y2, \
                                                             width = 2, \
@@ -319,7 +320,7 @@ class LabelTool():
                     self.bboxIdList.append(tmpId)
                     self.bboxListGoogle.append((self.listClassName[int(new_tmp[0])],float(conv_x1/self.img.size[0]), float(conv_y1/self.img.size[1]), float(conv_x2/self.img.size[0]), float(conv_y1/self.img.size[1]), 
                                                 float(conv_x2/self.img.size[0]), float(conv_y2/self.img.size[1]), float(conv_x1/self.img.size[0]), float(conv_y2/self.img.size[1])))
-                    self.listbox.insert(END, '%d (%0.1f, %0.1f) -> (%0.1f, %0.1f)' %(new_tmp[0], conv_x1, conv_y1, conv_x2, conv_y2))
+                    self.listbox.insert(END, '%d (%d, %0.1f) -> (%0.1f, %0.1f)' %(int(new_tmp[0]), conv_x1, conv_y1, conv_x2, conv_y2))
                     self.listbox.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[(len(self.bboxIdList) - 1) % len(COLORS)])
 
     def saveImage(self):
@@ -377,10 +378,11 @@ class LabelTool():
                 conv_w = float(w / size[0])
                 conf_h = float(h / size[1])
                 self.bboxList.append((idx, conv_x, conv_y, conv_w, conf_h))
-                self.bboxListGoogle.append((sel[0], float(x1/w), float(y1/h), float(x2/w), float(y1/h), float(x2/w), float(y2/h), float(x1/w), float(y2/h)))
+                self.bboxListGoogle.append((self.listClassName[idx], float(x1/self.img.size[0]), float(y1/self.img.size[1]), float(x2/self.img.size[0]), float(y1/self.img.size[1]), 
+                                            float(x2/self.img.size[0]), float(y2/self.img.size[1]), float(x1/self.img.size[0]), float(y2/self.img.size[1])))
                 self.bboxIdList.append(self.bboxId)
                 self.bboxId = None
-                self.listbox.insert(END, '%d (%0.4f, %0.4f, %0.4f, %0.4f)' % (idx, conv_x, conv_y, conv_w, conf_h))
+                self.listbox.insert(END, '%d (%d, %0.4f, %0.4f, %0.4f)' % (idx, conv_x, conv_y, conv_w, conf_h))
                 self.listbox.itemconfig(len(self.bboxIdList) - 1, fg=COLORS[(len(self.bboxIdList) - 1) % len(COLORS)])
         self.STATE['click'] = 1 - self.STATE['click']
 
